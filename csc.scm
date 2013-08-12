@@ -70,6 +70,7 @@
 (define win mingw)
 (define netbsd (eq? (software-version) 'netbsd))
 (define cygwin (eq? (build-platform) 'cygwin))
+(define aix (eq? (build-platform) 'aix))
 
 (define elf
   (memq (software-version) '(linux netbsd freebsd solaris openbsd)))
@@ -521,6 +522,7 @@ EOF
       (cons (cond
              (osx (if lib "-dynamiclib" "-bundle"))
              (else "-shared")) link-options))
+    (if aix (set! link-options (cons* "-maix64" "-Wl,-R\".\"" "-Wl,-bsvr4" "-Wl,-bbigtoc" link-options)))
     (set! shared #t) )
 
   (define (use-private-repository)
