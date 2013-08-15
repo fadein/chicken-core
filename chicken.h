@@ -2950,7 +2950,7 @@ C_path_to_executable(C_char *fname)
     return buffer;
   }
   else return NULL;  
-# elif defined(__unix__) || defined(__unix) || defined(C_XXXBSD)
+# elif defined(__unix__) || defined(__unix) || defined(C_XXXBSD) || defined(_AIX)
   int i, j, k, l;
   C_char *path, *dname;
 
