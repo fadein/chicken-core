@@ -522,7 +522,6 @@ EOF
       (cons (cond
              (osx (if lib "-dynamiclib" "-bundle"))
              (else "-shared")) link-options))
-    (if aix (set! link-options (cons* "-maix64" "-Wl,-R\".\"" "-Wl,-bsvr4" "-Wl,-bbigtoc" link-options)))
     (set! shared #t) )
 
   (define (use-private-repository)
