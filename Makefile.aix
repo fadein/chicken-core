@@ -49,10 +49,13 @@ C_COMPILER_OPTIMIZATION_OPTIONS ?= -Os -fomit-frame-pointer
 endif
 endif
 
-LINKER_LINK_SHARED_LIBRARY_OPTIONS = -shared -maix64 -Wl,-bnoquiet
-LINKER_LINK_SHARED_DLOADABLE_OPTIONS = -L. -shared -Wl,-R"$(RUNTIME_LINKER_PATH)" -maix64 -Wl,-bbigtoc -Wl,-bsvr4  -Wl,-bnoquiet
-LINKER_LINK_SHARED_PROGRAM_OPTIONS = -Wl,-R"$(RUNTIME_LINKER_PATH)" -maix64 -Wl,-bbigtoc -Wl,-bsvr4  -Wl,-bnoquiet
-LIBCHICKEN_SO_LINKER_OPTIONS = -maix64 -Wl,-bbigtoc -Wl,-bnoquiet
+CXX_COMPILER = g++
+
+LINKER_LINK_SHARED_LIBRARY_OPTIONS = -shared -maix64
+LINKER_LINK_SHARED_DLOADABLE_OPTIONS = -L. -shared -Wl,-R"$(RUNTIME_LINKER_PATH)" -maix64 -Wl,-bbigtoc -Wl,-bsvr4
+LINKER_LINK_SHARED_PROGRAM_OPTIONS = -Wl,-R"$(RUNTIME_LINKER_PATH)" -maix64 -Wl,-bbigtoc -Wl,-bsvr4
+LINKER_OPTIONS = -maix64 -Wl,-bbigtoc -Wl,-bsvr4
+LIBCHICKEN_SO_LINKER_OPTIONS = -maix64 -Wl,-bbigtoc -Wl,-bsvr4
 LIBRARIAN_OPTIONS = -rv -X 64
 LIBRARIES = -lm -ldl
 NEEDS_RELINKING = yes
@@ -68,6 +71,7 @@ CHICKEN_CONFIG_H = chicken-config.h
 
 include $(SRCDIR)/defaults.make
 
+# I'm not sure if AIX's /usr/include/poll.h is POSIX compliant
 chicken-config.h: chicken-defaults.h
 	echo "/* GENERATED */" >$@
 	echo "#define HAVE_DIRENT_H 1" >>$@
@@ -86,7 +90,7 @@ chicken-config.h: chicken-defaults.h
 	echo "#define HAVE_STRINGS_H 1" >>$@
 	echo "#define HAVE_STRING_H 1" >>$@
 	echo "#define HAVE_STRTOLL 1" >>$@
-	echo "#define HAVE_STRTOQ 1" >>$@
+	echo "#define HAVE_STRTOQ 0" >>$@
 	echo "#define HAVE_SYS_STAT_H 1" >>$@
 	echo "#define HAVE_SYS_TYPES_H 1" >>$@
 	echo "#define HAVE_UNISTD_H 1" >>$@
@@ -98,7 +102,6 @@ chicken-config.h: chicken-defaults.h
 	echo "#define HAVE_ERRNO_H 1" >>$@
 	echo "#define HAVE_GCVT 1" >>$@
 	echo "#define HAVE_SYSEXITS_H 1" >>$@
-	echo "#define HAVE_MEMMOVE 1" >>$@
 	echo "#define C_STACK_GROWS_DOWNWARD 1" >>$@
 ifdef GCHOOKS
 	echo "#define C_GC_HOOKS" >>$@
