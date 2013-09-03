@@ -4,12 +4,12 @@
 # - Note: this needs a proper shell, so it will not work with plain mingw
 #   (just the compiler and the Windows shell, without MSYS)
 
-
 set -e
 TEST_DIR=`pwd`
 OS_NAME=`uname -s`
 DYLD_LIBRARY_PATH=${TEST_DIR}/..
-LD_LIBRARY_PATH=${TEST_DIR}/..
+LD_LIBRARY_PATH=${LD_LIBRARY_PATH}:${TEST_DIR}/..
+#LD_LIBRARY_PATH=${TEST_DIR}/..
 LIBRARY_PATH=${TEST_DIR}/..:${LIBRARY_PATH}
 export DYLD_LIBRARY_PATH LD_LIBRARY_PATH LIBRARY_PATH
 
@@ -405,11 +405,25 @@ CHICKEN_REPOSITORY=$CHICKEN_REPOSITORY $CHICKEN_INSTALL -t local -l $TEST_DIR -r
  -csi ${TEST_DIR}/../csi
 CHICKEN_REPOSITORY=$CHICKEN_REPOSITORY $interpret -bnq rev-app.scm 1.0
 
+echo
+echo "dump -X64 -nhv rev-app | less"
+echo
 echo "======================================== deployment tests"
+# echo "Press the [ANY] key to continue"
+# read
+set -x
+
 mkdir rev-app
 CHICKEN_REPOSITORY=$CHICKEN_REPOSITORY $CHICKEN_INSTALL -t local -l $TEST_DIR reverser
+echo
+echo
 CHICKEN_REPOSITORY=$CHICKEN_REPOSITORY $compile2 -deploy rev-app.scm
-CHICKEN_REPOSITORY=$CHICKEN_REPOSITORY $CHICKEN_INSTALL -deploy -prefix rev-app -t local -l $TEST_DIR reverser
+echo
+echo
+export CSC_OPTIONS=-v\ -Wl,-R/home/efalor/.storm-dev/lib
+CHICKEN_REPOSITORY=$CHICKEN_REPOSITORY $CHICKEN_INSTALL -deploy -prefix rev-app -t local -l $TEST_DIR reverser -k
+echo
+echo
 unset LD_LIBRARY_PATH DYLD_LIBRARY_PATH CHICKEN_REPOSITORY
 rev-app/rev-app 1.1
 mv rev-app rev-app-2
