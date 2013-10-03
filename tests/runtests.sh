@@ -4,12 +4,12 @@
 # - Note: this needs a proper shell, so it will not work with plain mingw
 #   (just the compiler and the Windows shell, without MSYS)
 
+set -x
 set -e
 TEST_DIR=`pwd`
 OS_NAME=`uname -s`
 DYLD_LIBRARY_PATH=${TEST_DIR}/..
-LD_LIBRARY_PATH=${LD_LIBRARY_PATH}:${TEST_DIR}/..
-#LD_LIBRARY_PATH=${TEST_DIR}/..
+LD_LIBRARY_PATH=${TEST_DIR}/..
 LIBRARY_PATH=${TEST_DIR}/..:${LIBRARY_PATH}
 export DYLD_LIBRARY_PATH LD_LIBRARY_PATH LIBRARY_PATH
 
@@ -38,21 +38,6 @@ FAST_OPTIONS="-O5 -d0 -b -disable-interrupts"
 
 TYPESDB=../types.db
 cp $TYPESDB test-repository/types.db
-
-if test -n "$MSYSTEM"; then
-    CHICKEN="..\\chicken.exe"
-    ASMFLAGS=-Wa,-w
-    # make compiled tests use proper library on Windows
-    cp ../lib*chicken*.dll .
-fi
-
-
-# for cygwin
-if test -f ../cygchicken-0.dll; then
-    cp ../cygchicken-0.dll .
-    cp ../cygchicken-0.dll reverser/tags/1.0
-    mv ../cygchicken-0.dll ../cygchicken-0.dll_
-fi
 
 compile="../csc -compiler $CHICKEN -v -I.. -L.. -include-path .. -o a.out"
 compile2="../csc -compiler $CHICKEN -v -I.. -L.. -include-path .."
@@ -396,34 +381,21 @@ PATH=$PWD/tmp:$PATH xxx $PWD/tmp
 #PATH=$PATH:$PWD/tmp xxx $PWD/tmp
 rm -fr rev-app rev-app-2 reverser/*.import.* reverser/*.so
 
-echo "======================================== reinstall tests"
-CHICKEN_REPOSITORY=$CHICKEN_REPOSITORY $CHICKEN_UNINSTALL -force reverser
-CHICKEN_REPOSITORY=$CHICKEN_REPOSITORY $CHICKEN_INSTALL -t local -l $TEST_DIR reverser:1.0 \
- -csi ${TEST_DIR}/../csi
-CHICKEN_REPOSITORY=$CHICKEN_REPOSITORY $interpret -bnq rev-app.scm 1.0
-CHICKEN_REPOSITORY=$CHICKEN_REPOSITORY $CHICKEN_INSTALL -t local -l $TEST_DIR -reinstall -force \
- -csi ${TEST_DIR}/../csi
-CHICKEN_REPOSITORY=$CHICKEN_REPOSITORY $interpret -bnq rev-app.scm 1.0
+#  echo "======================================== reinstall tests"
+#  CHICKEN_REPOSITORY=$CHICKEN_REPOSITORY $CHICKEN_UNINSTALL -force reverser
+#  CHICKEN_REPOSITORY=$CHICKEN_REPOSITORY $CHICKEN_INSTALL -t local -l $TEST_DIR reverser:1.0 \
+#   -csi ${TEST_DIR}/../csi
+#  CHICKEN_REPOSITORY=$CHICKEN_REPOSITORY $interpret -bnq rev-app.scm 1.0
+#  CHICKEN_REPOSITORY=$CHICKEN_REPOSITORY $CHICKEN_INSTALL -t local -l $TEST_DIR -reinstall -force \
+#   -csi ${TEST_DIR}/../csi
+#  CHICKEN_REPOSITORY=$CHICKEN_REPOSITORY $interpret -bnq rev-app.scm 1.0
 
-echo
-echo "dump -X64 -nhv rev-app | less"
-echo
+export CSC_OPTIONS=-v
 echo "======================================== deployment tests"
-# echo "Press the [ANY] key to continue"
-# read
-set -x
-
 mkdir rev-app
 CHICKEN_REPOSITORY=$CHICKEN_REPOSITORY $CHICKEN_INSTALL -t local -l $TEST_DIR reverser
-echo
-echo
 CHICKEN_REPOSITORY=$CHICKEN_REPOSITORY $compile2 -deploy rev-app.scm
-echo
-echo
-export CSC_OPTIONS=-v\ -Wl,-R/home/efalor/.storm-dev/lib
-CHICKEN_REPOSITORY=$CHICKEN_REPOSITORY $CHICKEN_INSTALL -deploy -prefix rev-app -t local -l $TEST_DIR reverser -k
-echo
-echo
+CHICKEN_REPOSITORY=$CHICKEN_REPOSITORY $CHICKEN_INSTALL -deploy -prefix rev-app -t local -l $TEST_DIR reverser
 unset LD_LIBRARY_PATH DYLD_LIBRARY_PATH CHICKEN_REPOSITORY
 rev-app/rev-app 1.1
 mv rev-app rev-app-2
