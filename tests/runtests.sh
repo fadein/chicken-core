@@ -9,7 +9,8 @@ set -e
 TEST_DIR=`pwd`
 OS_NAME=`uname -s`
 DYLD_LIBRARY_PATH=${TEST_DIR}/..
-LD_LIBRARY_PATH=${TEST_DIR}/..
+LD_LIBRARY_PATH=${LD_LIBRARY_PATH}:${TEST_DIR}/..
+#LD_LIBRARY_PATH=${TEST_DIR}/..
 LIBRARY_PATH=${TEST_DIR}/..:${LIBRARY_PATH}
 export DYLD_LIBRARY_PATH LD_LIBRARY_PATH LIBRARY_PATH
 
@@ -65,11 +66,29 @@ rm -fr rev-app rev-app-2 reverser/*.import.* reverser/*.so
 #  CHICKEN_REPOSITORY=$CHICKEN_REPOSITORY $interpret -bnq rev-app.scm 1.0
 
 export CSC_OPTIONS=-v
+echo
+echo "on AIX, run this command to check rev-app's rpath:"
+echo "dump -X64 -nhv rev-app | less"
+echo
+echo "on Linux, use this command instead:"
+echo "objdump -x rev-app | grep ORIGIN"
+echo
 echo "======================================== deployment tests"
+# echo "Press the [ANY] key to continue"
+# read
+set -x
+
 mkdir rev-app
 CHICKEN_REPOSITORY=$CHICKEN_REPOSITORY $CHICKEN_INSTALL -t local -l $TEST_DIR reverser
+echo
+echo
 CHICKEN_REPOSITORY=$CHICKEN_REPOSITORY $compile2 -deploy rev-app.scm
-CHICKEN_REPOSITORY=$CHICKEN_REPOSITORY $CHICKEN_INSTALL -deploy -prefix rev-app -t local -l $TEST_DIR reverser
+echo
+echo
+export CSC_OPTIONS=-v\ -Wl,-R/home/efalor/.storm-dev/lib
+CHICKEN_REPOSITORY=$CHICKEN_REPOSITORY $CHICKEN_INSTALL -deploy -prefix rev-app -t local -l $TEST_DIR reverser -k
+echo
+echo
 unset LD_LIBRARY_PATH DYLD_LIBRARY_PATH CHICKEN_REPOSITORY
 rev-app/rev-app 1.1
 mv rev-app rev-app-2
