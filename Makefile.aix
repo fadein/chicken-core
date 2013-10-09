@@ -51,17 +51,34 @@ endif
 
 CXX_COMPILER = g++
 
-LINKER_LINK_SHARED_LIBRARY_OPTIONS = -shared -maix64
-LINKER_LINK_SHARED_DLOADABLE_OPTIONS = -L. -shared -Wl,-R"$(RUNTIME_LINKER_PATH)" -maix64 -Wl,-bbigtoc -Wl,-bsvr4
-LINKER_LINK_SHARED_PROGRAM_OPTIONS = -Wl,-R"$(RUNTIME_LINKER_PATH)" -maix64 -Wl,-bbigtoc -Wl,-bsvr4
-LINKER_OPTIONS = -maix64 -Wl,-bbigtoc -Wl,-bsvr4
-LIBCHICKEN_SO_LINKER_OPTIONS = -maix64 -Wl,-bbigtoc -Wl,-bsvr4
+#used in pretty much every target
+# no default value - explicitly defined in each Makefile.platform
+LINKER_OPTIONS = -Wl,-kLINKER_OPTIONS -maix64 -Wl,-bbigtoc -Wl,-bsvr4 -Wl,-R"$(RUNTIME_LINKER_PATH)"
+
+# used for %.so
+LINKER_LINK_SHARED_DLOADABLE_OPTIONS = -Wl,-kLINKER_LINK_SHARED_DLOADABLE_OPTIONS -L. -shared -maix64 -Wl,-bbigtoc -Wl,-bsvr4
+
+#LINKER_EXECUTABLE_OPTIONS = -Wl,-kLINKER_EXECUTABLE_OPTIONS
+
+# used only for chicken.so
+LINKER_LINK_SHARED_LIBRARY_OPTIONS = -Wl,-kLINKER_LINK_SHARED_LIBRARY_OPTIONS -shared
+
+# also used only for chicken.so
+# no default value - explicitly defined in each Makefile.platform
+# other platforms use this to pass -soname,libchicken.so.$(BINARYVERSION) to the linker
+#LIBCHICKEN_SO_LINKER_OPTIONS = -maix64 -Wl,-bbigtoc -Wl,-bsvr4
+
+#used for $(CHICKEN_SHARED_EXECUTABLE) (aka chicken), and each of csi, csc, chicken-{{,un}install,status,profile}
+# no default value - explicitly defined in each Makefile.platform
+#LINKER_LINK_SHARED_PROGRAM_OPTIONS = -Wl,-kLINKER_LINK_SHARED_PROGRAM_OPTIONS
+
+#used for static versions of chicken, csi and chicken-bug chicken-boot
+#LINKER_STATIC_OPTIONS = -Wl,-kLINKER_STATIC_OPTIONS
+
 LIBRARIAN_OPTIONS = -rv -X 64
 LIBRARIES = -lm -ldl
 NEEDS_RELINKING = yes
 USES_SONAME = yes
-
-LINKER_STATIC_OPTIONS = -maix64 -Wl,-bbigtoc -Wl,-bsvr4
 
 # special files
 
