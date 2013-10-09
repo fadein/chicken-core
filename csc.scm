@@ -272,6 +272,9 @@
 				 INSTALL_LIB_HOME
 				 TARGET_RUN_LIB_HOME)))
 		 "\"")) )
+		 (aix (if deployed
+				(list "-Wl,-kCSC_DEPLOYED" "-L." "-Wl,-k/")
+				'()))
 	 (else
 	  (list (conc "-L\"" library-dir "\""))))
    (if (and deployed (eq? (software-version) 'freebsd))
