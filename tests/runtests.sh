@@ -82,6 +82,7 @@ mkdir rev-app
 CHICKEN_REPOSITORY=$CHICKEN_REPOSITORY $CHICKEN_INSTALL -t local -l $TEST_DIR reverser
 echo
 echo
+echo "this is the one with the [panic] nursery is too small"
 CHICKEN_REPOSITORY=$CHICKEN_REPOSITORY $compile2 -deploy rev-app.scm
 echo
 echo
