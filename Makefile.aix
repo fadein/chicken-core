@@ -53,15 +53,16 @@ CXX_COMPILER = g++
 
 #used in pretty much every target
 # no default value - explicitly defined in each Makefile.platform
-LINKER_OPTIONS = -Wl,-kLINKER_OPTIONS -maix64 -Wl,-bbigtoc -Wl,-bsvr4 -Wl,-R"$(RUNTIME_LINKER_PATH)"
+#LINKER_OPTIONS = -Wl,-kLINKER_OPTIONS -maix64 -Wl,-bbigtoc -Wl,-R"$(RUNTIME_LINKER_PATH)" -Wl,-k/
+LINKER_OPTIONS = -Wl,-kLINKER_OPTIONS -maix64 -Wl,-bbigtoc -Wl,-k/
 
 # used for %.so
-LINKER_LINK_SHARED_DLOADABLE_OPTIONS = -Wl,-kLINKER_LINK_SHARED_DLOADABLE_OPTIONS -L. -shared -maix64 -Wl,-bbigtoc -Wl,-bsvr4
+LINKER_LINK_SHARED_DLOADABLE_OPTIONS = -Wl,-kLINKER_LINK_SHARED_DLOADABLE_OPTIONS -L. -shared -Wl,-bsvr4 -Wl,-k/
 
-#LINKER_EXECUTABLE_OPTIONS = -Wl,-kLINKER_EXECUTABLE_OPTIONS
+LINKER_EXECUTABLE_OPTIONS = -Wl,-kLINKER_EXECUTABLE_OPTIONS -Wl,-bsvr4 -L. -Wl,-R"$(RUNTIME_LINKER_PATH)" -Wl,-k/
 
 # used only for chicken.so
-LINKER_LINK_SHARED_LIBRARY_OPTIONS = -Wl,-kLINKER_LINK_SHARED_LIBRARY_OPTIONS -shared
+LINKER_LINK_SHARED_LIBRARY_OPTIONS = -Wl,-kLINKER_LINK_SHARED_LIBRARY_OPTIONS -shared -Wl,-bsvr4 -Wl,-k/
 
 # also used only for chicken.so
 # no default value - explicitly defined in each Makefile.platform
