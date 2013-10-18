@@ -4,7 +4,7 @@
 # - Note: this needs a proper shell, so it will not work with plain mingw
 #   (just the compiler and the Windows shell, without MSYS)
 
-set -x
+
 set -e
 TEST_DIR=`pwd`
 OS_NAME=`uname -s`
@@ -12,6 +12,13 @@ DYLD_LIBRARY_PATH=${TEST_DIR}/..
 LD_LIBRARY_PATH=${TEST_DIR}/..
 LIBRARY_PATH=${TEST_DIR}/..:${LIBRARY_PATH}
 export DYLD_LIBRARY_PATH LD_LIBRARY_PATH LIBRARY_PATH
+
+case `uname` in
+	AIX)
+		DIFF_OPTS=-b ;;
+	*)
+		DIFF_OPTS=-bu ;;
+esac
 
 rm -fr test-repository
 mkdir -p test-repository
@@ -38,6 +45,21 @@ FAST_OPTIONS="-O5 -d0 -b -disable-interrupts"
 
 TYPESDB=../types.db
 cp $TYPESDB test-repository/types.db
+
+if test -n "$MSYSTEM"; then
+    CHICKEN="..\\chicken.exe"
+    ASMFLAGS=-Wa,-w
+    # make compiled tests use proper library on Windows
+    cp ../lib*chicken*.dll .
+fi
+
+
+# for cygwin
+if test -f ../cygchicken-0.dll; then
+    cp ../cygchicken-0.dll .
+    cp ../cygchicken-0.dll reverser/tags/1.0
+    mv ../cygchicken-0.dll ../cygchicken-0.dll_
+fi
 
 compile="../csc -compiler $CHICKEN -v -I.. -L.. -include-path .. -o a.out"
 compile2="../csc -compiler $CHICKEN -v -I.. -L.. -include-path .."
@@ -68,7 +90,7 @@ if test \! -f scrutiny.expected; then
     cp scrutiny.out scrutiny.expected
 fi
 
-diff -bu scrutiny.expected scrutiny.out
+diff $DIFF_OPTS scrutiny.expected scrutiny.out
 
 $compile scrutiny-tests-2.scm -A -scrutinize -analyze-only -ignore-repository -types $TYPESDB 2>scrutiny-2.out -verbose
 
@@ -81,7 +103,7 @@ if test \! -f scrutiny-2.expected; then
     cp scrutiny-2.out scrutiny-2.expected
 fi
 
-diff -bu scrutiny-2.expected scrutiny-2.out
+diff $DIFF_OPTS scrutiny-2.expected scrutiny-2.out
 
 $compile scrutiny-tests-3.scm -specialize -block -ignore-repository -types $TYPESDB
 ./a.out
@@ -137,10 +159,10 @@ $interpret -s reader-tests.scm
 
 echo "======================================== dynamic-wind tests ..."
 $interpret -s dwindtst.scm >dwindtst.out
-diff -bu dwindtst.expected dwindtst.out
+diff $DIFF_OPTS dwindtst.expected dwindtst.out
 $compile dwindtst.scm
 ./a.out >dwindtst.out
-diff -bu dwindtst.expected dwindtst.out
+diff $DIFF_OPTS dwindtst.expected dwindtst.out
 echo "*** Skipping \"feeley-dynwind\" for now ***"
 # $interpret -s feeley-dynwind.scm
 
@@ -240,7 +262,7 @@ if test -n "$MSYSTEM"; then
     # the windows runtime library prints flonums differently
     tail r4rstest.log
 else
-    diff -bu r4rstest.out r4rstest.log
+    diff $DIFF_OPTS r4rstest.out r4rstest.log
 fi
 
 echo "======================================== syntax tests (r5rs_pitfalls) ..."
@@ -381,16 +403,15 @@ PATH=$PWD/tmp:$PATH xxx $PWD/tmp
 #PATH=$PATH:$PWD/tmp xxx $PWD/tmp
 rm -fr rev-app rev-app-2 reverser/*.import.* reverser/*.so
 
-#  echo "======================================== reinstall tests"
-#  CHICKEN_REPOSITORY=$CHICKEN_REPOSITORY $CHICKEN_UNINSTALL -force reverser
-#  CHICKEN_REPOSITORY=$CHICKEN_REPOSITORY $CHICKEN_INSTALL -t local -l $TEST_DIR reverser:1.0 \
-#   -csi ${TEST_DIR}/../csi
-#  CHICKEN_REPOSITORY=$CHICKEN_REPOSITORY $interpret -bnq rev-app.scm 1.0
-#  CHICKEN_REPOSITORY=$CHICKEN_REPOSITORY $CHICKEN_INSTALL -t local -l $TEST_DIR -reinstall -force \
-#   -csi ${TEST_DIR}/../csi
-#  CHICKEN_REPOSITORY=$CHICKEN_REPOSITORY $interpret -bnq rev-app.scm 1.0
+echo "======================================== reinstall tests"
+CHICKEN_REPOSITORY=$CHICKEN_REPOSITORY $CHICKEN_UNINSTALL -force reverser
+CHICKEN_REPOSITORY=$CHICKEN_REPOSITORY $CHICKEN_INSTALL -t local -l $TEST_DIR reverser:1.0 \
+ -csi ${TEST_DIR}/../csi
+CHICKEN_REPOSITORY=$CHICKEN_REPOSITORY $interpret -bnq rev-app.scm 1.0
+CHICKEN_REPOSITORY=$CHICKEN_REPOSITORY $CHICKEN_INSTALL -t local -l $TEST_DIR -reinstall -force \
+ -csi ${TEST_DIR}/../csi
+CHICKEN_REPOSITORY=$CHICKEN_REPOSITORY $interpret -bnq rev-app.scm 1.0
 
-export CSC_OPTIONS=-v
 echo "======================================== deployment tests"
 mkdir rev-app
 CHICKEN_REPOSITORY=$CHICKEN_REPOSITORY $CHICKEN_INSTALL -t local -l $TEST_DIR reverser
