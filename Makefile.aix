@@ -51,30 +51,10 @@ endif
 
 CXX_COMPILER = g++
 
-#used in pretty much every target
-# no default value - explicitly defined in each Makefile.platform
-#LINKER_OPTIONS = -Wl,-kLINKER_OPTIONS -maix64 -Wl,-bbigtoc -Wl,-R"$(RUNTIME_LINKER_PATH)" -Wl,-k/
-LINKER_OPTIONS = -Wl,-kLINKER_OPTIONS -maix64 -Wl,-bsvr4 -Wl,-bbigtoc -Wl,-k/
-
-# used for %.so
-LINKER_LINK_SHARED_DLOADABLE_OPTIONS = -Wl,-kLINKER_LINK_SHARED_DLOADABLE_OPTIONS -L. -shared -Wl,-k/
-
-LINKER_EXECUTABLE_OPTIONS = -Wl,-kLINKER_EXECUTABLE_OPTIONS -L. -Wl,-R"$(RUNTIME_LINKER_PATH)" -Wl,-k/
-
-# used only for chicken.so
-LINKER_LINK_SHARED_LIBRARY_OPTIONS = -Wl,-kLINKER_LINK_SHARED_LIBRARY_OPTIONS -shared -Wl,-k/
-
-# also used only for chicken.so
-# no default value - explicitly defined in each Makefile.platform
-# other platforms use this to pass -soname,libchicken.so.$(BINARYVERSION) to the linker
-#LIBCHICKEN_SO_LINKER_OPTIONS = -maix64 -Wl,-bbigtoc -Wl,-bsvr4
-
-#used for $(CHICKEN_SHARED_EXECUTABLE) (aka chicken), and each of csi, csc, chicken-{{,un}install,status,profile}
-# no default value - explicitly defined in each Makefile.platform
-#LINKER_LINK_SHARED_PROGRAM_OPTIONS = -Wl,-kLINKER_LINK_SHARED_PROGRAM_OPTIONS
-
-#used for static versions of chicken, csi and chicken-bug chicken-boot
-#LINKER_STATIC_OPTIONS = -Wl,-kLINKER_STATIC_OPTIONS
+LINKER_OPTIONS = -maix64 -Wl,-bsvr4 -Wl,-bbigtoc
+LINKER_LINK_SHARED_DLOADABLE_OPTIONS = -L. -shared
+LINKER_EXECUTABLE_OPTIONS = -L. -Wl,-R"$(RUNTIME_LINKER_PATH)"
+LINKER_LINK_SHARED_LIBRARY_OPTIONS = -shared
 
 LIBRARIAN_OPTIONS = -rv -X 64
 LIBRARIES = -lm -ldl
@@ -89,7 +69,6 @@ CHICKEN_CONFIG_H = chicken-config.h
 
 include $(SRCDIR)/defaults.make
 
-# I'm not sure if AIX's /usr/include/poll.h is POSIX compliant
 chicken-config.h: chicken-defaults.h
 	echo "/* GENERATED */" >$@
 	echo "#define HAVE_DIRENT_H 1" >>$@
