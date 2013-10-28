@@ -69,6 +69,10 @@
 - C API
   - Deprecated C_get_argument[_2] and C_get_environment_variable[_2] functions.
 
+- Platform support
+  - Added support for AIX using gcc (consult the "README" file for more
+	information).
+
 4.8.1
 
 - Security fixes

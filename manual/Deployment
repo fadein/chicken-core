@@ -161,6 +161,11 @@ Invoking
 
 will list dynamic libraries that your application needs.
 
+===== AIX
+
+Deployment is not fully supported on AIX as the runtime linker will only load
+libraries from paths hardcoded at link time.
+
 ===== Other UNIX flavors
 
 Setting up the application executable to load runtime libraries from

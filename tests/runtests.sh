@@ -412,8 +412,10 @@ CHICKEN_REPOSITORY=$CHICKEN_REPOSITORY $CHICKEN_INSTALL -t local -l $TEST_DIR -r
  -csi ${TEST_DIR}/../csi
 CHICKEN_REPOSITORY=$CHICKEN_REPOSITORY $interpret -bnq rev-app.scm 1.0
 
-if test $OS_NAME != AIX; then
-	echo "======================================== deployment tests"
+echo "======================================== deployment tests"
+if test $OS_NAME = AIX; then
+	echo "Deployment is not supported on AIX; skipping this test"
+else
 	mkdir rev-app
 	CHICKEN_REPOSITORY=$CHICKEN_REPOSITORY $CHICKEN_INSTALL -t local -l $TEST_DIR reverser
 	CHICKEN_REPOSITORY=$CHICKEN_REPOSITORY $compile2 -deploy rev-app.scm
